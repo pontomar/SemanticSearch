@@ -1,6 +1,6 @@
 # Local Semantic Search Engine
 
-A fully local semantic search engine for Markdown, PDF, DOCX, and TXT files stored in OneDrive.  
+A fully local semantic search engine for Markdown, PDF, DOCX, and TXT files.
 All processing — text extraction, embedding, and search — happens on your machine. No cloud.
 
 ## Core Libraries Used in this Project
