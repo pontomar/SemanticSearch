@@ -49,6 +49,6 @@ All processing — text extraction, embedding, and search — happens on your ma
 ## Run
 ```bash
 python build_index.py   # index your files
-uvicorn app:app --reload --host 0.0.0.0 --port 8000
-
+uvicorn app:app --host 127.0.0.1 --port 8000
 Then open http://localhost:8000/docs to test.
+
