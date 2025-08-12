@@ -7,6 +7,11 @@ from sentence_transformers import SentenceTransformer
 from pypdf import PdfReader
 import docx
 import re
+import warnings
+from pypdf.errors import PdfReadWarning
+import pypdfium2 as pdfium
+
+warnings.filterwarnings("ignore", category=PdfReadWarning)
 
 # Load config
 with open("config.yaml", "r", encoding="utf-8") as f:
@@ -21,16 +26,38 @@ CHUNK_SIZE = config["chunking"]["size"]
 CHUNK_OVERLAP = config["chunking"]["overlap"]
 FILE_TYPES = config["file_types"]
 
+
+def pdf_extract_text(path: Path) -> str:
+    # Try pypdf
+    try:
+        reader = PdfReader(str(path))
+        parts = []
+        for p in reader.pages:
+            t = (p.extract_text() or "").strip()
+            parts.append(t)
+        text = "\n".join(parts).strip()
+        if len(text) >= 40:  # good enough → use it
+            return text
+    except Exception:
+        pass
+
+    # Fallback: pypdfium2 text extraction
+    try:
+        doc = pdfium.PdfDocument(str(path))
+        out = []
+        for i in range(len(doc)):
+            page = doc[i]
+            textpage = page.get_textpage()
+            out.append(textpage.get_text_range())
+        return "\n".join(out).strip()
+    except Exception:
+        return ""
+
 # Helper: text extraction
 def extract_text(file_path: Path) -> str:
     ext = file_path.suffix.lower()
     if ext == ".pdf":
-        text = ""
-        with open(file_path, "rb") as f:
-            reader = PdfReader(f)
-            for page in reader.pages:
-                text += page.extract_text() or ""
-        return text
+        return pdf_extract_text(file_path)
     elif ext == ".docx":
         doc = docx.Document(file_path)
         return "\n".join(p.text for p in doc.paragraphs)
@@ -47,6 +74,7 @@ def chunk_text(text: str):
         if chunk.strip():
             chunks.append(chunk)
     return chunks
+
 
 # Build index
 model = SentenceTransformer(MODEL_NAME, device=DEVICE)
@@ -76,7 +104,7 @@ vecs = np.vstack(vectors).astype("float32")
 vecs /= (np.linalg.norm(vecs, axis=1, keepdims=True) + 1e-12)
 
 dim = vecs.shape[1]
-index = faiss.IndexFlatIP(dim)   # cosine similarity when vectors are normalized
+index = faiss.IndexFlatIP(dim)  # cosine similarity when vectors are normalized
 index.add(vecs)
 
 faiss.write_index(index, str(INDEX_DIR / "faiss_index.bin"))
