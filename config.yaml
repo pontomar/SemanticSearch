@@ -1,0 +1,19 @@
+docs_dir: 'C:\Users\41766\POSTUNI\SemanticSearch\PracticeFiles'
+index_dir: ".local_semantic_index"
+
+model:
+  name: "all-MiniLM-L6-v2"
+  device: "cpu"
+
+chunking:
+  size: 500       # tokens per chunk (approx.)
+  overlap: 50     # overlapping tokens for context
+
+search:
+  top_k: 8
+
+file_types:
+  - .pdf
+  - .docx
+  - .txt
+  - .md
