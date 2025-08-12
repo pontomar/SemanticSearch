@@ -9,7 +9,7 @@ All processing — text extraction, embedding, and search — happens on your ma
 - SentenceTransformers – State-of-the-art embeddings for semantic similarity.
 - PyYAML – Easy configuration loading from YAML files.
 - python-docx – Extracts text from Word .docx files. 
-- pypdf – PDF text extraction. 
+- pypdf, pypdfium2 – PDF text extraction. 
 - NumPy – Vector and matrix operations. 
 - FastAPI – High-performance API for searching embeddings. 
 - Uvicorn – ASGI server to run the FastAPI backend.
